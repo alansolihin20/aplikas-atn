@@ -160,6 +160,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/absensi/masuk', [AttendanceController::class, 'checkIn'])->name('absensi.masuk');
     Route::post('/absensi/pulang', [AttendanceController::class, 'checkOut'])->name('absensi.pulang');
 
+    Route::post('/absensi/check-in', [AttendanceController::class, 'checkIn'])->name('absensi.checkIn');
+    Route::post('/absensi/check-out', [AttendanceController::class, 'checkOut'])->name('absensi.checkOut');
+    Route::post('/absensi/confirm-photo', [AttendanceController::class, 'confirmCheckInPhoto'])->name('absensi.confirmPhoto');
+
 });
 
 

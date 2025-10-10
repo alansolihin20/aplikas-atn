@@ -28,7 +28,15 @@ class AttendanceController extends Controller
             ->take(10)
             ->get();
 
-        return view('absensi.index', compact('absenHariIni', 'riwayat'));
+        $kantor = OfficeLocation::first(); // ambil data kantor pertama
+        $absenHariIni = Attendance::where('user_id', auth()->id())
+                    ->whereDate('check_in', now()->toDateString())
+                    ->first();
+        $riwayat = Attendance::where('user_id', auth()->id())
+                    ->orderBy('check_in', 'desc')
+                    ->get();
+
+        return view('absensi.index', compact('absenHariIni', 'riwayat','kantor'));
     }
 
     
