@@ -46,7 +46,7 @@
         <!-- Absensi -->
         <li class="nav-header">Absensi</li>
         <li class="nav-item">
-          <a href="#" class="nav-link">
+          <a href="{{ url('/absensi') }}" class="nav-link">
             <i class="nav-icon fa-solid fa-calendar-check"></i>
             <p>Kehadiran</p>
           </a>

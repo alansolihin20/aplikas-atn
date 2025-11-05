@@ -5,31 +5,35 @@ namespace App\Models\Inventory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Inventory\Items;
+use App\Models\User;
 
-class Inventory extends Model
+class BarangKeluar extends Model
 {
     use HasFactory;
 
-    protected $table = 'items';
+    protected $table = 'barang_keluar';
 
     protected $fillable = [
         'item_id',
-        'stok_awal',
-        'stok_masuk',
-        'stok_keluar',
-        'periode',
+        'jumlah',
+        'tujuan',
+        'tanggal_keluar',
+        'keterangan',
+        'created_by'
     ];
 
     protected $casts = [
-        'id' => 'integer',
-        'kode_barang' => 'string',
-        'satuan' => 'string',
-        'harga_beli' => 'decimal:2',
+        'tanggal' => 'datetime'
     ];
-
 
     public function item()
     {
         return $this->belongsTo(Items::class, 'item_id');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
 }

@@ -21,15 +21,30 @@ class Attendance extends Model
         'photo_url'
     ];
 
-    public function user()
+   
+
+    public function shiftSchedule()
+    {
+        return $this->belongsTo(ShiftSchedule::class, 'shift_id');
+    }
+
+   public function user()
     {
         return $this->belongsTo(User::class);
     }
 
+    /** Relasi ke tabel shifts */
     public function shift()
     {
-        return $this->belongsTo(ShiftSchedule::class, 'shift_id');
+        return $this->belongsTo(Shift::class, 'shift_id');
     }
+
+    /** Relasi ke tabel shift_schedules */
+    public function schedule()
+    {
+        return $this->belongsTo(ShiftSchedule::class, 'schedule_id');
+    }
+
 
     public $timestamps = true;
     const UPDATED_AT = null;

@@ -46,6 +46,8 @@
     <link rel="stylesheet" href="{{asset('adminlte/dist/css/adminlte.css')}}" />
     <!--end::Required Plugin(AdminLTE)-->
     <!-- apexcharts -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.css"
@@ -63,6 +65,7 @@
       <x-sidebar /> 
       
       @yield('content')
+      @yield('scripts')
 
       <x-footer />
       <!--end::Footer-->
@@ -230,6 +233,7 @@
       );
       sales_chart.render();
     </script>
+    @stack('scripts')
     <!--end::Script-->
   </body>
   <!--end::Body-->

@@ -8,6 +8,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\KaryawanModel;
+use App\Models\Attendance;
+use App\Models\Inventory\RequestBarang;
 
 class User extends Authenticatable
 {
@@ -50,6 +52,16 @@ class User extends Authenticatable
     public function karyawan()
     {
         return $this->hasOne(KaryawanModel::class, 'user_id');
+    }
+
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    public function requests()
+    {
+        return $this->hasMany(RequestBarang::class, 'requested_by');
     }
 
 }

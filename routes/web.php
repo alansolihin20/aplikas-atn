@@ -20,6 +20,13 @@ use App\Http\Controllers\TeknisiController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Shift\AttendanceController;
 use App\Http\Controllers\Absensi\AbsensiController;
+use App\Http\Controllers\Absensi\ControlAdminController;
+use App\Http\Controllers\adminControl\ShiftScheduleController;
+use App\Http\Controllers\adminControl\ShiftTime;
+use App\Http\Controllers\adminControl\RiwayatController;
+use App\Services\MikrotikService;
+use App\Http\Controllers\mikrotik\MikrotikConnectionController;
+use App\Http\Controllers\mikrotik\PppoeController;
 
 
 
@@ -125,45 +132,89 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{id}', [UserController::class, 'destroy'])->name('user.destroy');
     });
 
-    Route::prefix('inventori')->group(function () {
-        Route::get('/', [InventoryController::class, 'index'])->name('inventori.index');
-    });
+    // Route::prefix('inventori')->group(function () {
+    //     Route::get('/', [InventoryController::class, 'index'])->name('inventori.index');
+    // });
 
-    Route::prefix('barang-in')->group(function () {
-        Route::get('/', [BarangInController::class, 'index'])->name('barang-in.index');
-        Route::post('/store', [BarangInController::class, 'store'])->name('barang-in.store');
-    });
+    // Route::prefix('barang-in')->group(function () {
+    //     Route::get('/', [BarangInController::class, 'index'])->name('barang-in.index');
+    //     Route::post('/store', [BarangInController::class, 'store'])->name('barang-in.store');
+    // });
 
-    Route::prefix('barang-out')->group(function () {
-        Route::get('/', [BarangOutController::class, 'index'])->name('barang-out.index');
-    });
+    // Route::prefix('barang-out')->group(function () {
+    //     Route::get('/', [BarangOutController::class, 'index'])->name('barang-out.index');
+    // });
 
-    Route::prefix('supplier')->group(function () {
-        Route::get('/', [SuppliersController::class, 'index'])->name('supplier.index');
-    });
+    // Route::prefix('supplier')->group(function () {
+    //     Route::get('/', [SuppliersController::class, 'index'])->name('supplier.index');
+    // });
 
-    Route::prefix('opname')->group(function () {
-        Route::get('/', [OpnameController::class, 'index'])->name('opname.index');
-    });
-
-
-    Route::post('/check-in', [AttendanceController::class, 'checkIn'])->name('check.in');
-    Route::post('/check-out', [AttendanceController::class, 'checkOut'])->name('check.out');
-
-    Route::get('/absensi', [AbsensiController::class, 'index'])->name('absensi.index');
-    Route::post('/absensi/masuk', [AbsensiController::class, 'absenMasuk'])->name('absensi.masuk');
-    Route::post('/absensi/pulang', [AbsensiController::class, 'absenPulang'])->name('absensi.pulang');
-
+    // Route::prefix('opname')->group(function () {
+    //     Route::get('/', [OpnameController::class, 'index'])->name('opname.index');
+    // });
 
 
     Route::get('/absensi', [AttendanceController::class, 'index'])->name('absensi.index');
-    Route::post('/absensi/masuk', [AttendanceController::class, 'checkIn'])->name('absensi.masuk');
-    Route::post('/absensi/pulang', [AttendanceController::class, 'checkOut'])->name('absensi.pulang');
-
     Route::post('/absensi/check-in', [AttendanceController::class, 'checkIn'])->name('absensi.checkIn');
     Route::post('/absensi/check-out', [AttendanceController::class, 'checkOut'])->name('absensi.checkOut');
     Route::post('/absensi/confirm-photo', [AttendanceController::class, 'confirmCheckInPhoto'])->name('absensi.confirmPhoto');
+    Route::post('/confirm-out-photo', [AttendanceController::class, 'confirmCheckOutPhoto'])->name('absensi.confirmCheckOutPhoto');
+    Route::post('/absensi/confirm-checkout-photo', [AttendanceController::class, 'confirmCheckOutPhoto'])->name('absensi.confirmCheckOutPhoto');
+    Route::post('/absensi/confirm-checkin-photo', [AttendanceController::class, 'confirmCheckInPhoto'])->name('absensi.confirmCheckInPhoto');
+    
 
+    Route::get('/admin/absensi', [ControlAdminController::class, 'index'])->name('admin.absensi.index');
+    Route::post('/admin/absensi/store-schedule', [ControlAdminController::class, 'storeSchedule'])->name('admin.absensi.storeSchedule');
+
+    Route::get('/admin/shift-schedules', [ShiftScheduleController::class, 'index'])->name('admin.shift_schedules.index');
+    Route::post('/admin/shift-schedules/store', [ShiftScheduleController::class, 'store'])->name('admin.shift_schedules.store');
+    Route::post('/admin/shift-schedules/auto-generate', [ShiftScheduleController::class, 'autoGenerate'])
+    ->name('admin.shift_schedules.auto_generate');
+    Route::get('admin/shift-schedules/weekly', [ShiftScheduleController::class, 'weekly'])->name('shift.weekly');
+
+    Route::get('/admin/shift-times', [ShiftTime::class, 'index'])->name('admin.shift_times.index');
+    Route::post('/admin/shift-times/store', [ShiftTime::class, 'store'])->name('admin.shift_times.store');
+
+    Route::get('/admin/riwayat', [RiwayatController::class, 'index'])->name('admin.riwayat.index');
+
+
+    
+
+// Route::get('/api/mikrotik-test', function() {
+//     try {
+//         $svc = new MikrotikService();
+//         $interfaces = $svc->getInterfaces();
+//         $ppp = $svc->getPppActive();
+//         return response()->json([
+//             'ok' => true,
+//             'interfaces_count' => count($interfaces),
+//             'ppp_active_count' => count($ppp),
+//             'interfaces' => $interfaces,
+//             'ppp_active' => $ppp,
+//         ]);
+//     } catch (\Exception $e) {
+//         return response()->json(['ok' => false, 'error' => $e->getMessage()], 500);
+//     }
+// });
+
+
+Route::resource('/admin/mikrotik', MikrotikConnectionController::class);
+Route::post('mikrotik/test-connection', [MikrotikConnectionController::class, 'testConnection'])
+    ->name('mikrotik.test');
+
+    Route::get('/mikrotik/sync-pppoe', [MikrotikConnectionController::class, 'syncPppoe'])
+    ->name('mikrotik.syncPppoe');
+    
+    // // Hapus semua Route::get dan Route::post Anda, lalu ganti dengan ini:
+    // Route::get('/admin/pppoe', function() {
+    // return "Route sudah bisa diakses oleh Laravel!";
+    // });
+
+    Route::get('/pppoe', [App\Http\Controllers\mikrotik\PppoeController::class, 'index'])->name('pppoe.index');
+    Route::post('/pppoe', [App\Http\Controllers\mikrotik\PppoeController::class, 'store'])->name('pppoe.store');
+    Route::put('/pppoe/{pppoe}', [App\Http\Controllers\mikrotik\PppoeController::class, 'update'])->name('pppoe.update');
+    Route::delete('/pppoe/{pppoe}', [App\Http\Controllers\mikrotik\PppoeController::class, 'destroy'])->name('pppoe.destroy');
+    Route::post('/pppoe/sync', [App\Http\Controllers\mikrotik\PppoeController::class, 'syncFromMikrotik'])->name('pppoe.sync');
 });
 
 

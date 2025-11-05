@@ -4,6 +4,21 @@
       @section('title', 'Teknisi')
 <meta http-equiv="Cache-Control" content="no-store" />
       @section('content')
+
+
+
+      @php
+          $user = auth()->user();
+
+          // Ambil shift aktif hari ini
+          $todaySchedule = \App\Models\ShiftSchedule::where('user_id', $user->id)
+                          ->whereDate('date', now()->toDateString())
+                          ->with('shift')
+                          ->first();
+
+          $shiftName = $todaySchedule ? $todaySchedule->shift->name : '-';
+          $shiftTime = $todaySchedule ? $todaySchedule->shift->start_time . ' - ' . $todaySchedule->shift->end_time : '-';
+      @endphp
        <main class="app-main">
         <!--begin::App Content Header-->
         <div class="app-content-header">
@@ -35,10 +50,10 @@
                 <!--begin::Small Box Widget 1-->
                 <div class="small-box text-bg-primary">
                   <div class="inner">
-                    <h3>150</h3>
-                    <p>Jadwal Hari Ini</p>
+                    <h3>Shift {{ $shiftName }}</h3>
+                    <p>Jadwal Hari Ini: {{ $shiftTime }}</p>
                   </div>
-                  <svg
+                 <svg
                     class="small-box-icon"
                     fill="currentColor"
                     viewBox="0 0 24 24"
@@ -46,9 +61,17 @@
                     aria-hidden="true"
                   >
                     <path
-                      d="M2.25 2.25a.75.75 0 000 1.5h1.386c.17 0 .318.114.362.278l2.558 9.592a3.752 3.752 0 00-2.806 3.63c0 .414.336.75.75.75h15.75a.75.75 0 000-1.5H5.378A2.25 2.25 0 017.5 15h11.218a.75.75 0 00.674-.421 60.358 60.358 0 002.96-7.228.75.75 0 00-.525-.965A60.864 60.864 0 005.68 4.509l-.232-.867A1.875 1.875 0 003.636 2.25H2.25zM3.75 20.25a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zM16.5 20.25a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0z"
+                      clip-rule="evenodd"
+                      fill-rule="evenodd"
+                      d="M2.25 13.5a8.25 8.25 0 018.25-8.25.75.75 0 01.75.75v6.75H18a.75.75 0 01.75.75 8.25 8.25 0 01-16.5 0z"
+                    ></path>
+                    <path
+                      clip-rule="evenodd"
+                      fill-rule="evenodd"
+                      d="M12.75 3a.75.75 0 01.75-.75 8.25 8.25 0 018.25 8.25.75.75 0 01-.75.75h-7.5a.75.75 0 01-.75-.75V3z"
                     ></path>
                   </svg>
+
                   <a
                     href="{{ route('absensi.index') }}"
                     class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover"
@@ -56,8 +79,7 @@
                     Isi Absen <i class="bi bi-link-45deg"></i>
                   </a>
                 </div>
-                <!--end::Small Box Widget 1-->
-              </div>
+                </div>
               <!--end::Col-->
               <div class="col-lg-3 col-6">
                 <!--begin::Small Box Widget 2-->
@@ -122,24 +144,7 @@
                     <h3>65</h3>
                     <p>Unique Visitors</p>
                   </div>
-                  <svg
-                    class="small-box-icon"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
-                  >
-                    <path
-                      clip-rule="evenodd"
-                      fill-rule="evenodd"
-                      d="M2.25 13.5a8.25 8.25 0 018.25-8.25.75.75 0 01.75.75v6.75H18a.75.75 0 01.75.75 8.25 8.25 0 01-16.5 0z"
-                    ></path>
-                    <path
-                      clip-rule="evenodd"
-                      fill-rule="evenodd"
-                      d="M12.75 3a.75.75 0 01.75-.75 8.25 8.25 0 018.25 8.25.75.75 0 01-.75.75h-7.5a.75.75 0 01-.75-.75V3z"
-                    ></path>
-                  </svg>
+                  
                   <a
                     href="#"
                     class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover"
@@ -155,23 +160,12 @@
             <!--begin::Row-->
             <div class="row">
               <!-- Start col -->
-              <div class="col-lg-7 connectedSortable">
-                <div class="card mb-4">
-                  <div class="card-header"><h3 class="card-title">Sales Value</h3></div>
-                  <div class="card-body"><div id="revenue-chart"></div></div>
-                </div>
-                <!-- /.card -->
-                <!-- DIRECT CHAT -->
-           
-                <!-- /.direct-chat -->
-              </div>
+          
               <!-- /.Start col -->
               <!-- Start col -->
-              <div class="col-lg-5 connectedSortable">
-                <!-- Map card -->
-                <div class="card bg-gradient-primary mb-4">
-                  <div class="card-header border-0">
-                    <h3 class="card-title">Visitors</h3>
+          
+                 
+                  
                     <!-- card tools -->
               <!-- /.Start col -->
             </div>
