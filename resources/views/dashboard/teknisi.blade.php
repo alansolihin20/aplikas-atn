@@ -15,6 +15,13 @@
                           ->whereDate('date', now()->toDateString())
                           ->with('shift')
                           ->first();
+          $schedules = \App\Models\ShiftSchedule::with('shift')
+                          ->where('user_id', $user->id)
+                          ->whereBetween('date', [now()->startOfWeek(), now()->endOfWeek()])
+                          ->get();
+          $startOfWeek = now()->startOfWeek();
+          $endOfWeek = now()->endOfWeek();
+          $schedules = $schedules->keyBy('date');
 
           $shiftName = $todaySchedule ? $todaySchedule->shift->name : '-';
           $shiftTime = $todaySchedule ? $todaySchedule->shift->start_time . ' - ' . $todaySchedule->shift->end_time : '-';
@@ -50,7 +57,7 @@
                 <!--begin::Small Box Widget 1-->
                 <div class="small-box text-bg-primary">
                   <div class="inner">
-                    <h3>Shift {{ $shiftName }}</h3>
+                    <h3>{{ $shiftName }}</h3>
                     <p>Jadwal Hari Ini: {{ $shiftTime }}</p>
                   </div>
                  <svg
@@ -85,8 +92,8 @@
                 <!--begin::Small Box Widget 2-->
                 <div class="small-box text-bg-success">
                   <div class="inner">
-                    <h3>53</h3>
-                    <p>Jadwal Bulan Ini</p>
+                    <h3>{{ $schedules->count() }}</h3>
+                    <p>Jadwal Minggu Ini</p>
                   </div>
                   <svg
                     class="small-box-icon"
@@ -100,7 +107,7 @@
                     ></path>
                   </svg>
                   <a
-                    href="#"
+                    href="{{ route('teknisi.weekly_schedule') }}"
                     class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover"
                   >
                     Lihat Jadwal<i class="bi bi-link-45deg"></i>

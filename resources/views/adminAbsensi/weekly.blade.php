@@ -83,30 +83,20 @@
                                             @endphp
 
                                             {{-- Kolom Jadwal Per Hari --}}
-                                            <td>
+                                            <td class="editable-shift" data-schedule-id="{{ $schedule->id ?? '' }}">
                                                 @if ($schedule && $schedule->shift)
-                                                    {{-- Tampilkan Shift dengan warna sesuai ID --}}
                                                     <span class="badge bg-{{ 
                                                         $schedule->shift->id == 1 ? 'primary' : 
                                                         ($schedule->shift->id == 2 ? 'success' : 'info') 
-                                                    }} mb-1">
+                                                    }}">
                                                         {{ $schedule->shift->name ?? 'Shift ' . $schedule->shift->id }}
                                                     </span>
-
-                                                    {{-- Tambahkan Waktu Shift --}}
-                                                    @if($schedule->shift->start_time && $schedule->shift->end_time)
-                                                        <br>
-                                                        <small class="text-muted" style="font-size: 0.75rem;">
-                                                            {{ substr($schedule->shift->start_time, 0, 5) }} - {{ substr($schedule->shift->end_time, 0, 5) }}
-                                                        </small>
-                                                    @endif
-
-                                                @elseif ($schedule && !$schedule->shift)
-                                                    {{-- Jika ada schedule tapi tidak ada shift (diasumsikan libur) --}}
-                                                    <span class="badge bg-warning text-dark">OFF</span>
+                                                    <br>
+                                                    <small class="text-muted" style="font-size: 0.75rem;">
+                                                        {{ substr($schedule->shift->start_time, 0, 5) }} - {{ substr($schedule->shift->end_time, 0, 5) }}
+                                                    </small>
                                                 @else
-                                                    {{-- Tidak ada data jadwal untuk tanggal tersebut --}}
-                                                    <span class="text-muted" title="Belum diatur">-</span>
+                                                    <span class="text-muted badge bg-danger">LIBUR</span>
                                                 @endif
                                             </td>
                                         @endforeach
@@ -122,6 +112,49 @@
     <!--end::Container-->
 </div>
 <!--end::App Content-->
+@push('scripts')
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    document.querySelectorAll('.editable-shift').forEach(cell => {
+        cell.addEventListener('click', async function () {
+            const scheduleId = this.dataset.scheduleId;
+            if (!scheduleId) return;
+
+            // Tampilkan pilihan shift (popup kecil)
+            const newShift = prompt("Masukkan ID Shift baru (misal: 1 atau 2):");
+            if (!newShift) return;
+
+            try {
+                const res = await fetch("{{ route('shift.update') }}", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRF-TOKEN": csrfToken,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        schedule_id: scheduleId,
+                        shift_id: newShift
+                    })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    alert("Shift berhasil diubah!");
+                    window.location.reload(); // refresh tabel biar update
+                } else {
+                    alert("Gagal mengubah shift!");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Terjadi kesalahan koneksi.");
+            }
+        });
+    });
+});
+</script>
+@endpush
 
 </main>
 @endsection

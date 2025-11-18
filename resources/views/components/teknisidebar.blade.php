@@ -37,7 +37,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a href="#" class="nav-link">
+          <a href="{{ url('/slip-saya') }}" class="nav-link">
             <i class="nav-icon fa-solid fa-file-invoice"></i>
             <p>Slip Gaji</p>
           </a>

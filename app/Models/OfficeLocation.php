@@ -17,7 +17,6 @@ class OfficeLocation extends Model
         'radius',
     ];
 
-
     public $timestamps = false;
 
 

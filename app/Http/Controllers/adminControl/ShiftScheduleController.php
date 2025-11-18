@@ -141,5 +141,20 @@ public function weekly(Request $request)
     return view('adminAbsensi.weekly', compact('schedules', 'users', 'startOfWeek', 'endOfWeek'));
 }
 
+public function updateShift(Request $request)
+{
+    $request->validate([
+        'schedule_id' => 'required|exists:shift_schedules,id',
+        'shift_id' => 'required|exists:shifts,id',
+    ]);
+
+    $schedule = ShiftSchedule::findOrFail($request->schedule_id);
+    $schedule->shift_id = $request->shift_id;
+    $schedule->save();
+
+    return response()->json(['success' => true, 'message' => 'Shift berhasil diubah.']);
+}
+
+
 
 }

@@ -71,7 +71,7 @@
         <li class="nav-item"><a href="{{ url('/admin/shift-schedules') }}" class="nav-link"><i class="nav-icon bi bi-calendar-week"></i> Jadwal Teknisi</a></li>
         <li class="nav-item"><a href="{{ url('/admin/shift-schedules/weekly') }}" class="nav-link"><i class="nav-icon bi bi-calendar-week"></i> Jadwal Mingguan</a></li>
         <li class="nav-item"><a href="{{ url('/admin/riwayat') }}" class="nav-link"><i class="nav-icon bi bi-person-check"></i> Absensi Teknisi</a></li>
-        <li class="nav-item"><a href="#" class="nav-link"><i class="nav-icon bi bi-cash-stack"></i> Slip Gaji Teknisi</a></li>
+        <li class="nav-item"><a href="{{ url('/slip-gaji') }}" class="nav-link"><i class="nav-icon bi bi-cash-stack"></i> Slip Gaji Teknisi</a></li>
 
         <!-- Laporan -->
         <li class="nav-header">Laporan</li>

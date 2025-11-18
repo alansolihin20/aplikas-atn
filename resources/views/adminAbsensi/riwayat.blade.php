@@ -2,7 +2,7 @@
       @extends('layouts.app')
 
       @section('title', 'Karyawan')
-<meta http-equiv="Cache-Control" content="no-store" />
+    <meta http-equiv="Cache-Control" content="no-store" />
       @section('content')
       <main class="app-main">
         <!--begin::App Content Header-->
