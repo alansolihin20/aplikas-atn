@@ -17,5 +17,16 @@ class ItemOutModel extends Model
         'used_by',
         'purpose',
         'note',
+        'user_id',
     ];
+    public function item()
+    {
+        return $this->belongsTo(ItemModel::class, 'item_id');
+    }
+
+    // Opsional jika ingin tahu siapa user yang memakai
+    public function user()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'used_by');
+    }
 }

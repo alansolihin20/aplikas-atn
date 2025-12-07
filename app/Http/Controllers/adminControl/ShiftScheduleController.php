@@ -54,75 +54,69 @@ class ShiftScheduleController extends Controller
 
   public function autoGenerate(Request $request)
 {
-    $request->validate([
-        'week_start' => 'required|date',
-    ]);
+    $request->validate(['week_start' => 'required|date']);
 
     $startDate = Carbon::parse($request->week_start)->startOfWeek();
     $shifts = Shift::all();
 
-    // Ambil teknisi (ubah ID sesuai data kamu)
+    if ($shifts->count() < 2) {
+        return back()->with('error', 'Minimal harus ada 2 shift untuk Auto Generate!');
+    }
+
     $senior = User::where('role', 'teknisi')->whereIn('id', [2, 3])->get();
     $junior = User::where('role', 'teknisi')->whereIn('id', [4, 5])->get();
 
-    // Tentukan rotasi mingguan
+    if ($senior->count() < 2 || $junior->count() < 2) {
+        return back()->with('error', 'Minimal harus ada 2 senior & 2 junior untuk rotasi otomatis!');
+    }
+
     $weekNumber = $startDate->weekOfYear;
     $isEvenWeek = $weekNumber % 2 === 0;
 
-    // Kalau minggu genap dan ganjil, tukar pasangan biar adil
-    if ($isEvenWeek) {
-        $pairShift1 = [$senior[1], $junior[1]]; // Pasangan A
-        $pairShift2 = [$senior[0], $junior[0]]; // Pasangan B
-    } else {
-        $pairShift1 = [$senior[0], $junior[0]]; // Pasangan A
-        $pairShift2 = [$senior[1], $junior[1]]; // Pasangan B
-    }
+    $pairShift1 = $isEvenWeek ? [$senior[1], $junior[1]] : [$senior[0], $junior[0]];
+    $pairShift2 = $isEvenWeek ? [$senior[0], $junior[0]] : [$senior[1], $junior[1]];
 
-    // Loop 7 hari (Senin–Minggu)
-    foreach (range(0, 6) as $i) {
+    foreach (range(0,6) as $i) {
         $date = $startDate->copy()->addDays($i);
 
-        // ✅ Sabtu (index 5) & Minggu (index 6)
         if ($date->isSaturday()) {
-            // Sabtu: pasangan A
             foreach ($pairShift1 as $user) {
                 ShiftSchedule::updateOrCreate(
-                    ['user_id' => $user->id, 'date' => $date],
-                    ['shift_id' => $shifts[0]->id] // shift 1
+                    ['user_id'=> $user->id,'date'=>$date],
+                    ['shift_id'=> $shifts[0]->id]
                 );
             }
             continue;
         }
 
         if ($date->isSunday()) {
-            // Minggu: pasangan B
             foreach ($pairShift2 as $user) {
                 ShiftSchedule::updateOrCreate(
-                    ['user_id' => $user->id, 'date' => $date],
-                    ['shift_id' => $shifts[0]->id] // shift 1
+                    ['user_id'=> $user->id,'date'=>$date],
+                    ['shift_id'=> $shifts[0]->id]
                 );
             }
             continue;
         }
 
-        // ✅ Senin–Jumat: semua teknisi masuk
         foreach ($pairShift1 as $user) {
             ShiftSchedule::updateOrCreate(
-                ['user_id' => $user->id, 'date' => $date],
-                ['shift_id' => $shifts[0]->id] // shift 1
+                ['user_id'=>$user->id,'date'=>$date],
+                ['shift_id'=>$shifts[0]->id]
             );
         }
-
+        
         foreach ($pairShift2 as $user) {
             ShiftSchedule::updateOrCreate(
-                ['user_id' => $user->id, 'date' => $date],
-                ['shift_id' => $shifts[1]->id] // shift 2
+                ['user_id'=>$user->id,'date'=>$date],
+                ['shift_id'=>$shifts[1]->id] // shift kedua tersedia karena sudah divalidasi
             );
         }
     }
 
-    return back()->with('success', 'Jadwal minggu ini berhasil dibuat!');
+    return back()->with('success','Jadwal minggu ini berhasil dibuat!');
 }
+
 
 
 public function weekly(Request $request)
@@ -155,6 +149,25 @@ public function updateShift(Request $request)
     return response()->json(['success' => true, 'message' => 'Shift berhasil diubah.']);
 }
 
+    public function deleteByWeek(Request $request)
+    {
+        $request->validate([
+            'week_start' => 'required|date',
+        ]);
 
+        $startDate = Carbon::parse($request->week_start)->startOfWeek();
+        $endDate = $startDate->copy()->addDays(6);
 
+        ShiftSchedule::whereBetween('date', [$startDate, $endDate])->delete();
+
+        return back()->with('success', 'Jadwal shift untuk minggu tersebut berhasil dihapus.');
+    }     
+
+    public function destroy($id)
+    {
+        $schedule = ShiftSchedule::findOrFail($id);
+        $schedule->delete();
+
+        return back()->with('success', 'Jadwal shift berhasil dihapus.');   
+    }
 }

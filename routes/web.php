@@ -43,6 +43,7 @@ use App\Http\Controllers\inventory\ItemController;
 use App\Http\Controllers\inventory\ItemRequestController;
 use App\Http\Controllers\inventory\ItemEntryController;
 use App\Http\Controllers\inventory\ItemOutController;
+use App\Http\Controllers\teknisiControl\TeknisiInventory;
 /*
 |--------------------------------------------------------------------------
 | Redirect root (/) langsung ke login
@@ -92,6 +93,8 @@ Route::middleware(['auth', 'role:superadmin'])->group(function () {
     Route::get('dashboard/superadmin', [DashboardController::class, 'superadminDashboard'])
         ->name('dashboard.superadmin');
 });
+
+
 
 
 /*
@@ -177,14 +180,28 @@ Route::middleware('auth')->group(function () {
 
     // Shift Schedule
     Route::prefix('admin/shift-schedules')->group(function () {
+        
+        // 1. Rute Index (Halaman Utama Jadwal)
         Route::get('/', [ShiftScheduleController::class, 'index'])->name('admin.shift_schedules.index');
+        
+        // 2. Rute Weekly (GET) - Mengaktifkan kembali akses mingguan
+        Route::get('/weekly', [ShiftScheduleController::class, 'weekly'])->name('admin.shift_schedules.weekly');
+        
+        // 3. Rute Store/Auto-Generate
         Route::post('/store', [ShiftScheduleController::class, 'store'])->name('admin.shift_schedules.store');
         Route::post('/auto-generate', [ShiftScheduleController::class, 'autoGenerate'])
             ->name('admin.shift_schedules.auto_generate');
-        Route::get('/weekly', [ShiftScheduleController::class, 'weekly'])->name('shift.weekly');
-    });
+            
+        // 4. Rute Delete by Week (DELETE)
+        Route::delete('/delete-by-week', [ShiftScheduleController::class, 'deleteByWeek'])
+            ->name('admin.shift_schedules.delete_by_week'); 
 
+        // 5. Rute Destroy Jadwal Individual (DELETE)
+        Route::delete('/{schedule}', [ShiftScheduleController::class, 'destroy'])->name('admin.shift_schedules.destroy');
+    });
+    
     // Shift Time
+    Route::delete('/{id}', [ShiftTime::class, 'destroy'])->name('admin.shift_times.destroy');
     Route::get('admin/shift-times', [ShiftTime::class, 'index'])->name('admin.shift_times.index');
     Route::post('admin/shift-times/store', [ShiftTime::class, 'store'])->name('admin.shift_times.store');
 
@@ -248,29 +265,55 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 
+
+
 Route::middleware(['auth'])->group(function () {
 
+    // Item Master
+    Route::resource('items', ItemController::class);
+
     // Supplier
-    Route::resource('/suppliers', SupplierController::class);
+    Route::resource('suppliers', SupplierController::class);
+    Route::get('suppliers', [SupplierController::class, 'index'])->name('suppliers.index');
+    Route::get('suppliers/create', [SupplierController::class, 'create'])->name('suppliers.create');
+    Route::post('suppliers', [SupplierController::class, 'store'])->name('suppliers.store');
+    Route::get('suppliers/{supplier}/edit', [SupplierController::class, 'edit'])->name('suppliers.edit');
+    Route::put('suppliers/{supplier}', [SupplierController::class, 'update'])->name('suppliers.update');
+    Route::delete('suppliers/{supplier}', [SupplierController::class, 'destroy'])->name('suppliers.destroy');
 
-    // Master barang
-    Route::resource('/items', ItemController::class);
 
-    // Request barang
-    Route::resource('/item-requests', ItemRequestController::class);
-    Route::post('/item-requests/{id}/approve', [ItemRequestController::class, 'approve'])->name('item-requests.approve');
-    Route::post('/item-requests/{id}/reject', [ItemRequestController::class, 'reject'])->name('item-requests.reject');
-    Route::post('/item-requests/{id}/order', [ItemRequestController::class, 'order'])->name('item-requests.order');
+    // Request Barang
+    Route::get('item-requests', [ItemRequestController::class, 'index'])->name('itemRequests.index');
+    Route::post('item-requests', [ItemRequestController::class, 'store'])->name('itemRequests.store');
+    Route::get('item-requests/{id}', [ItemRequestController::class, 'show'])->name('itemRequests.show');
+    Route::post('item-requests/{id}/send-to-supplier', [ItemRequestController::class, 'sendToSupplier'])
+        ->name('itemRequests.sendToSupplier');
+    Route::post('item-requests/{id}/approve-supplier', [ItemRequestController::class, 'approveFromSupplier'])
+        ->name('itemRequests.approveSupplier');
 
-    // Barang masuk
-    Route::get('stock-in', [StockInController::class, 'index'])->name('stockin.index');
-    Route::get('stock-in/create', [StockInController::class, 'create'])->name('stockin.create');
-    Route::post('stock-in', [StockInController::class, 'store'])->name('stockin.store');
+    // Barang Masuk
+    Route::get('item-entry', [ItemEntryController::class, 'index'])->name('itemEntry.index');
+    Route::post('item-entry', [ItemEntryController::class, 'store'])->name('itemEntry.store');
 
     // Barang Keluar
-    Route::get('stock-out', [StockOutController::class, 'index'])->name('stockout.index');
-    Route::get('stock-out/create', [StockOutController::class, 'create'])->name('stockout.create');
-    Route::post('stock-out', [StockOutController::class, 'store'])->name('stockout.store');
-
+    Route::get('item-out', [ItemOutController::class, 'index'])->name('itemOut.index');
+    Route::post('item-out', [ItemOutController::class, 'store'])->name('itemOut.store');
 });
+
+
+Route::middleware(['auth','role:teknisi'])->group((function () {
+   // Request barang
+
+    Route::get('teknisi/inventory/requests', [TeknisiInventory::class, 'requestIndex'])->name('teknisi.inventory.requests');
+    Route::post('teknisi/inventory/requests', [TeknisiInventory::class, 'storeRequest'])->name('teknisi.inventory.requests.store');
+
+    // Barang Masuk (read only )
+    Route::get('teknisi/inventory/item-entry', [TeknisiInventory::class, 'entryIndex'])->name('teknisi.inventory.itemEntry');   
+
+    // Barang Keluar
+    Route::get('teknisi/inventory/item-out', [TeknisiInventory::class, 'outIndex'])->name('teknisi.inventory.itemOut');
+    Route::post('teknisi/inventory/item-out', [TeknisiInventory::class, 'OutStore'])->name('teknisi.inventory.itemOut.store');
+}));
+
+
 

@@ -58,11 +58,11 @@
             <p>Inventori Barang <i class="nav-arrow bi bi-chevron-right"></i></p>
           </a>
           <ul class="nav nav-treeview">
-            <li class="nav-item"><a href="{{ url('inventori') }}" class="nav-link"><i class="nav-icon bi bi-circle"></i> Item Barang</a></li>
-            <li class="nav-item"><a href="{{ url('barang-in') }}" class="nav-link"><i class="nav-icon bi bi-circle"></i> Barang Masuk</a></li>
-            <li class="nav-item"><a href="{{ url('barang-out') }}" class="nav-link"><i class="nav-icon bi bi-circle"></i> Barang Keluar</a></li>
-            <li class="nav-item"><a href="{{ url('supplier') }}" class="nav-link"><i class="nav-icon bi bi-circle"></i> Supplier</a></li>
-            <li class="nav-item"><a href="{{ url('opname') }}" class="nav-link"><i class="nav-icon bi bi-circle"></i> Stok Opname</a></li>
+            <li class="nav-item"><a href="{{ url('items') }}" class="nav-link"><i class="nav-icon bi bi-circle"></i> Item Barang</a></li>
+            <li class="nav-item"><a href="{{ url('item-entry') }}" class="nav-link"><i class="nav-icon bi bi-circle"></i> Barang Masuk</a></li>
+            <li class="nav-item"><a href="{{ url('item-out') }}" class="nav-link"><i class="nav-icon bi bi-circle"></i> Barang Keluar</a></li>
+            <li class="nav-item"><a href="{{ url('suppliers') }}" class="nav-link"><i class="nav-icon bi bi-circle"></i> Supplier</a></li>
+            <li class="nav-item"><a href="{{ url('item-requests') }}" class="nav-link"><i class="nav-icon bi bi-circle"></i> Request Barang</a></li>
           </ul>
         </li>
 

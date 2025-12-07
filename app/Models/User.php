@@ -9,11 +9,13 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\KaryawanModel;
 use App\Models\Attendance;
-use App\Models\Inventory\RequestBarang;
+use App\Models\Inventory\ItemRequestModel;
+use Illuminate\Testing\Fluent\Concerns\Has;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
     protected $table = 'users';
 
@@ -61,7 +63,7 @@ class User extends Authenticatable
 
     public function requests()
     {
-        return $this->hasMany(RequestBarang::class, 'requested_by');
+        return $this->hasMany(ItemRequestModel::class, 'requested_by');
     }
 
 }

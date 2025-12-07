@@ -1,37 +1,35 @@
 <?php
 
-namespace App\Http\Controllers\inventory;
+namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
+use App\Models\Inventory\ItemOutModel;
+use App\Models\Inventory\ItemModel;
 use Illuminate\Http\Request;
-use App\Models\Inventory\ItemOutModel as ItemOut;
-use App\Models\Inventory\ItemModel as Item;
-
 
 class ItemOutController extends Controller
 {
+    public function index()
+    {
+        return view('inventory.out.index', [
+            'items' => ItemModel::all(),
+            'outs'  => ItemOutModel::with('item')->latest()->get()
+        ]);
+    }
+
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'item_id' => 'required|exists:items,id',
-            'qty' => 'required|integer|min:1',
-            'purpose' => 'nullable|string',
-            'note' => 'nullable|string',
+        ItemOutModel::create([
+            'item_id' => $request->item_id,
+            'qty'     => $request->qty,
+            'purpose' => $request->purpose,
+            'used_by' => auth()->id(),
         ]);
 
-        $data['used_by'] = auth()->id();
+        // kurangi stok
+        ItemModel::find($request->item_id)
+            ->decrement('stock', $request->qty);
 
-        $item = Item::find($data['item_id']);
-
-        if ($data['qty'] > $item->stock) {
-            return back()->with('error', 'Stok tidak cukup.');
-        }
-
-        ItemOut::create($data);
-
-        // Kurangi stok
-        $item->decrement('stock', $data['qty']);
-
-        return back()->with('success', 'Barang keluar berhasil dicatat.');
+        return back()->with('success', 'Barang keluar dicatat!');
     }
 }

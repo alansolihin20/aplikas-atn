@@ -4,39 +4,37 @@ namespace App\Http\Controllers\inventory;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Inventory\ItemEntryModel as ItemEntry;
-use App\Models\Inventory\ItemModel as Item;
-use App\Models\Inventory\ItemRequestModel as ItemRequest;
+use App\Models\Inventory\ItemEntryModel;
+use App\Models\Inventory\ItemModel;
+use App\Models\Inventory\ItemRequestModel;
 
 class ItemEntryController extends Controller
 {
+   public function index()
+    {
+        return view('inventory.entry.index', [
+            'entries'  => ItemEntryModel::with(['item', 'supplier'])->latest()->get(),
+            'requests' => ItemRequestModel::where('status','supplier_approved')->get()
+        ]);
+    }
+
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'supplier_id' => 'required|exists:suppliers,id',
-            'item_id' => 'required|exists:items,id',
-            'qty' => 'required|integer|min:1',
-            'price_per_unit' => 'nullable|integer',
-            'request_id' => 'nullable|exists:item_requests,id',
+        ItemEntryModel::create([
+            'request_id'   => $request->request_id,
+            'supplier_id'  => $request->supplier_id,
+            'item_id'      => $request->item_id,
+            'qty'          => $request->qty,
+            'price_per_item'=> $request->price_per_item,
+            'total_price'  => $request->qty * $request->price_per_item,
+            'received_by'  => auth()->id(),
         ]);
 
-        $data['received_by'] = auth()->id();
-        $data['total_price'] = $data['price_per_unit'] * $data['qty'];
+        // update stok
+        ItemModel::find($request->item_id)
+            ->increment('stock', $request->qty);
 
-        ItemEntry::create($data);
-
-        // Update stok
-        $item = Item::find($data['item_id']);
-        $item->increment('stock', $data['qty']);
-
-        // Tandai request selesai
-        if ($data['request_id']) {
-            ItemRequest::find($data['request_id'])->update([
-                'status' => 'received'
-            ]);
-        }
-
-        return back()->with('success', 'Barang masuk berhasil ditambahkan.');
+        return back()->with('success', 'Barang masuk berhasil ditambahkan!');
     }
 }
 

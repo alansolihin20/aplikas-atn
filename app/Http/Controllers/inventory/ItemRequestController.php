@@ -4,52 +4,79 @@ namespace App\Http\Controllers\inventory;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Inventory\Items;
-use App\Models\Inventory\Supplier;
-use App\Models\Inventory\ItemRequestModel as ItemRequest;
+use App\Models\Inventory\ItemModel;
+use App\Models\Inventory\SupplierModel;
+use App\Models\Inventory\ItemRequestModel;
+use Telegram\Bot\Facades\Telegram;
 
 
 class ItemRequestController extends Controller
 {
+    public function index()
+    {
+        return view('inventory.request.index', [
+            'requests' => ItemRequestModel::with(['item', 'user'])->latest()->get(),
+            'items'    => ItemModel::all(),
+            'suppliers'=> SupplierModel::all()
+        ]);
+    }
+
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'item_id' => 'nullable|exists:items,id',
-            'item_name_temp' => 'nullable|string',
-            'qty' => 'required|integer|min:1',
-            'note' => 'nullable|string',
+        // Pastikan ada array 'items' yang dikirim
+        $request->validate([
+            'items' => 'required|array',
+            'items.*.item_id' => 'required|exists:items,id', // Ganti 'item_models' dengan nama tabel barang Anda
+            'items.*.qty' => 'required|integer|min:1',
+            'items.*.note' => 'nullable|string',
         ]);
 
-        $data['user_id'] = auth()->id();
+        $requestsCreated = 0;
 
-        ItemRequest::create($data);
+        foreach ($request->items as $itemData) {
+            ItemRequestModel::create([
+                'user_id'  => auth()->id(),
+                'item_id'  => $itemData['item_id'],
+                'qty'      => $itemData['qty'],
+                'note'     => $itemData['note'] ?? null, // Gunakan null coalescing jika note opsional
+                'status'   => 'pending',
+            ]);
+            $requestsCreated++;
+        }
 
-        return back()->with('success', 'Request barang berhasil dibuat.');
+        if ($requestsCreated > 0) {
+            return back()->with('success', "{$requestsCreated} Permintaan barang berhasil dibuat!");
+        }
+
+        return back()->with('error', 'Tidak ada permintaan barang yang dibuat.');
     }
 
-    public function approve($id)
+    public function sendToSupplier($id)
     {
-        $req = ItemRequest::findOrFail($id);
-        $req->update(['status' => 'approved']);
+        $req = ItemRequestModel::with(['item'])->findOrFail($id);
 
-        return back()->with('success', 'Request disetujui.');
+        // Kirim Telegram ke supplier
+        $text = "📦 Permintaan Barang Baru\n".
+                "Item: {$req->item->name}\n".
+                "Qty : {$req->qty}\n".
+                "Note: {$req->note}";
+
+        Telegram::sendMessage([
+            'chat_id' => env('TELEGRAM_SUPPLIER_CHAT_ID'),
+            'text'    => $text
+        ]);
+
+        $req->update(['status' => 'sent_to_supplier']);
+
+        return back()->with('success', 'Permintaan dikirim ke supplier!');
     }
 
-    public function reject($id)
+    public function approveFromSupplier($id)
     {
-        $req = ItemRequest::findOrFail($id);
-        $req->update(['status' => 'rejected']);
+        ItemRequestModel::find($id)->update([
+            'status' => 'supplier_approved'
+        ]);
 
-        return back()->with('success', 'Request ditolak.');
-    }
-
-    public function order($id)
-    {
-        $req = ItemRequest::findOrFail($id);
-        $req->update(['status' => 'ordered']);
-
-        // TODO: Kirim Telegram ke supplier
-
-        return back()->with('success', 'Berhasil melakukan order ke supplier.');
+        return back()->with('success', 'Supplier telah menyetujui!');
     }
 }

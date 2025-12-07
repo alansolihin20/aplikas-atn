@@ -61,15 +61,20 @@
         <!-- Inventori -->
         <li class="nav-header">Inventori</li>
         <li class="nav-item">
-          <a href="#" class="nav-link">
+          <a href="{{ url('/teknisi/inventory/item-out') }}" class="nav-link">
             <i class="nav-icon fa-solid fa-boxes-stacked"></i>
             <p>Barang Keluar</p>
           </a>
         </li>
         <li class="nav-item">
-          <a href="#" class="nav-link">
+          <a href="{{ url('/teknisi/inventory/item-entry') }}" class="nav-link">
             <i class="nav-icon fa-solid fa-box-open"></i>
             <p>Barang Masuk</p>
+          </a>
+        <li class="nav-item">
+          <a href="{{ url('/teknisi/inventory/requests') }}" class="nav-link">
+            <i class="nav-icon fa-solid fa-clipboard-list"></i>
+            <p>Request Barang</p>
           </a>
         </li>
 

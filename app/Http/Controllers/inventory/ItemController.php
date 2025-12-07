@@ -3,49 +3,33 @@
 namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
-use App\Models\Inventory\ItemModel as Item;
+use App\Models\Inventory\ItemModel;
 use Illuminate\Http\Request;
 
 class ItemController extends Controller
 {
     public function index()
     {
-        $items = Item::latest()->get();
-        return view('inventory.item.index', compact('items'));
-    }
-
-    public function create()
-    {
-        return view('inventory.item.create');
+        return view('inventory.item.index', [
+            'items' => ItemModel::all()
+        ]);
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'nama_barang' => 'required',
-            'kategori' => 'nullable',
-            'stok' => 'required|numeric|min:0'
-        ]);
-
-        Item::create($request->all());
-
-        return redirect()->route('item.index')->with('success', 'Barang berhasil ditambahkan');
+        ItemModel::create($request->all());
+        return back()->with('success', 'Barang berhasil ditambahkan!');
     }
 
-    public function edit(Item $item)
+    public function update(Request $request, $id)
     {
-        return view('inventory.item.edit', compact('item'));
+        ItemModel::find($id)->update($request->all());
+        return back()->with('success', 'Barang berhasil diperbarui!');
     }
 
-    public function update(Request $request, Item $item)
+    public function destroy($id)
     {
-        $item->update($request->all());
-        return redirect()->route('item.index')->with('success', 'Barang berhasil diperbarui');
-    }
-
-    public function destroy(Item $item)
-    {
-        $item->delete();
-        return redirect()->route('item.index')->with('success', 'Barang berhasil dihapus');
+        ItemModel::destroy($id);
+        return back()->with('success', 'Barang berhasil dihapus!');
     }
 }

@@ -32,4 +32,12 @@ class ShiftTime extends Controller
         return redirect()->back()->with('success', 'Shift time berhasil ditambahkan.');
     }
 
+    function destroy($id)
+    {
+        $shift = Shift::findOrFail($id);
+        $shift->delete();
+
+        return redirect()->back()->with('success', 'Shift time berhasil dihapus.');
+    }
+
 }
